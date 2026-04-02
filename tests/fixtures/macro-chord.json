@@ -1,0 +1,179 @@
+{
+  "profile1": {
+    "fn1": {},
+    "fn1Pos": {
+      "0,0": "0,0",
+      "8,6": "8,6"
+    },
+    "fn1Top": {},
+    "fn2": {},
+    "fn2Pos": {},
+    "fn2Top": {},
+    "fn3": {},
+    "fn3Pos": {},
+    "fn3Top": {},
+    "fnTp": {},
+    "keyChange": {
+      "10": {
+        "data": 10,
+        "index": 10
+      }
+    },
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            "4",
+            "5",
+            "5",
+            "4"
+          ],
+          "ts": 128
+        },
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile2": {
+    "fn1": {},
+    "fn1Pos": {
+      "6,0": "6,0",
+      "8,6": "8,6"
+    },
+    "fn1Top": {},
+    "fn2": {},
+    "fn2Pos": {},
+    "fn2Top": {},
+    "fn3": {},
+    "fn3Pos": {},
+    "fn3Top": {},
+    "fnTp": {},
+    "keyChange": {
+      "10": {
+        "data": 10,
+        "index": 10
+      }
+    },
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile3": {
+    "fn1": {},
+    "fn1Pos": {
+      "6,0": "6,0",
+      "8,6": "8,6"
+    },
+    "fn1Top": {},
+    "fn2": {},
+    "fn2Pos": {},
+    "fn2Top": {},
+    "fn3": {},
+    "fn3Pos": {},
+    "fn3Top": {},
+    "fnTp": {},
+    "keyChange": {
+      "10": {
+        "data": 10,
+        "index": 10
+      }
+    },
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  }
+}

@@ -1,0 +1,251 @@
+{
+  "profile1": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {},
+    "fn1Top": {},
+    "fn2": {
+      "570": {
+        "index": 570,
+        "data": 305
+      },
+      "571": {
+        "index": 571,
+        "data": 306
+      }
+    },
+    "fn2Top": {
+      "516": {
+        "index": 516,
+        "data": 4
+      },
+      "556": {
+        "index": 556,
+        "data": 44
+      }
+    },
+    "fn3": {
+      "830": {
+        "index": 830,
+        "data": 240
+      }
+    },
+    "fn3Top": {
+      "772": {
+        "index": 772,
+        "data": 4
+      }
+    },
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile2": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {},
+    "fn1Top": {},
+    "fn2": {
+      "570": {
+        "index": 570,
+        "data": 305
+      },
+      "571": {
+        "index": 571,
+        "data": 306
+      }
+    },
+    "fn2Top": {
+      "516": {
+        "index": 516,
+        "data": 4
+      },
+      "556": {
+        "index": 556,
+        "data": 44
+      }
+    },
+    "fn3": {
+      "830": {
+        "index": 830,
+        "data": 240
+      }
+    },
+    "fn3Top": {
+      "772": {
+        "index": 772,
+        "data": 4
+      }
+    },
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile3": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {},
+    "fn1Top": {},
+    "fn2": {
+      "570": {
+        "index": 570,
+        "data": 305
+      },
+      "571": {
+        "index": 571,
+        "data": 306
+      }
+    },
+    "fn2Top": {
+      "516": {
+        "index": 516,
+        "data": 4
+      },
+      "556": {
+        "index": 556,
+        "data": 44
+      }
+    },
+    "fn3": {
+      "830": {
+        "index": 830,
+        "data": 240
+      }
+    },
+    "fn3Top": {
+      "772": {
+        "index": 772,
+        "data": 4
+      }
+    },
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  }
+}

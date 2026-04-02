@@ -1,0 +1,278 @@
+{
+  "profile1": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {
+      "286": {
+        "index": 286,
+        "data": 305
+      },
+      "287": {
+        "index": 287,
+        "data": 306
+      },
+      "288": {
+        "index": 288,
+        "data": 307
+      },
+      "289": {
+        "index": 289,
+        "data": 308
+      },
+      "290": {
+        "index": 290,
+        "data": 309
+      },
+      "291": {
+        "index": 291,
+        "data": 310
+      },
+      "292": {
+        "index": 292,
+        "data": 311
+      },
+      "293": {
+        "index": 293,
+        "data": 312
+      },
+      "294": {
+        "index": 294,
+        "data": 313
+      }
+    },
+    "fn2": {},
+    "fn3": {},
+    "fn1Top": {},
+    "fn2Top": {},
+    "fn3Top": {},
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile2": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {
+      "286": {
+        "index": 286,
+        "data": 305
+      },
+      "287": {
+        "index": 287,
+        "data": 306
+      },
+      "288": {
+        "index": 288,
+        "data": 307
+      },
+      "289": {
+        "index": 289,
+        "data": 308
+      },
+      "290": {
+        "index": 290,
+        "data": 309
+      },
+      "291": {
+        "index": 291,
+        "data": 310
+      },
+      "292": {
+        "index": 292,
+        "data": 311
+      },
+      "293": {
+        "index": 293,
+        "data": 312
+      },
+      "294": {
+        "index": 294,
+        "data": 313
+      }
+    },
+    "fn2": {},
+    "fn3": {},
+    "fn1Top": {},
+    "fn2Top": {},
+    "fn3Top": {},
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  },
+  "profile3": {
+    "keyChange": {
+      "10": {
+        "index": 10,
+        "data": 10
+      }
+    },
+    "fn1": {
+      "286": {
+        "index": 286,
+        "data": 305
+      },
+      "287": {
+        "index": 287,
+        "data": 306
+      },
+      "288": {
+        "index": 288,
+        "data": 307
+      },
+      "289": {
+        "index": 289,
+        "data": 308
+      },
+      "290": {
+        "index": 290,
+        "data": 309
+      },
+      "291": {
+        "index": 291,
+        "data": 310
+      },
+      "292": {
+        "index": 292,
+        "data": 311
+      },
+      "293": {
+        "index": 293,
+        "data": 312
+      },
+      "294": {
+        "index": 294,
+        "data": 313
+      }
+    },
+    "fn2": {},
+    "fn3": {},
+    "fn1Top": {},
+    "fn2Top": {},
+    "fn3Top": {},
+    "fn1Pos": {
+      "8,6": "8,6"
+    },
+    "fn2Pos": {},
+    "fn3Pos": {},
+    "fnTp": {},
+    "macro": {
+      "macro_1": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_2": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_3": [
+        {
+          "keyCode": [
+            0
+          ],
+          "ts": 0
+        }
+      ],
+      "macro_4": [],
+      "macro_5": [],
+      "macro_6": [],
+      "macro_7": [],
+      "macro_8": [],
+      "macro_9": [],
+      "macro_10": [],
+      "macro_11": [],
+      "macro_12": []
+    }
+  }
+}
