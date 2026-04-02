@@ -41,14 +41,9 @@
     <link rel="stylesheet" href="cdn/animate.min.css">
     <link rel="stylesheet" href="build/tippy.css">
 
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101925003-2"></script>
+    <!-- Analytics stub for offline use -->
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'UA-101925003-2');
+        function ga() {}
     </script>
 
     <script>
@@ -805,21 +800,27 @@
         </div>
     </div>
 </body>
-<!-- The core Firebase JS SDK is always required and must be listed first -->
-<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
-
-<!-- TODO: Add SDKs for Firebase products that you want to use
-     https://firebase.google.com/docs/web/setup#available-libraries -->
-<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-analytics.js"></script>
-<script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
-<!-- Add Firebase products that you want to use -->
-<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-database.js"></script>
-<!-- <script src="https://www.gstatic.com/firebasejs/5.5.0/firebase.js"></script> -->
-<!-- <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script> -->
-<!-- <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script> -->
-<!-- <script src="https://www.gstatic.com/firebasejs/3.3.2/firebase.js"></script> -->
+<!-- Firebase stub for offline use -->
+<script>
+    var firebase = {
+        initializeApp: function() {},
+        analytics: function() { return { logEvent: function() {} }; },
+        auth: function() {
+            return {
+                onAuthStateChanged: function(cb) { cb(null); },
+                signInWithPopup: function() { return Promise.reject(); },
+                signOut: function() { return Promise.resolve(); }
+            };
+        },
+        database: function() {
+            var refObj = { set: function(){}, remove: function(){}, on: function(){}, once: function(){ return Promise.resolve({ val: function(){ return null; } }); } };
+            return { ref: function() { return refObj; } };
+        },
+        firestore: function() { return {}; }
+    };
+    var firebaseui = { auth: { AuthUI: function() { return { start: function(){}, reset: function(){} }; } } };
+    function signOut() {}
+</script>
 <script src="cdn/Sortable.js"></script>
 <script src="build/htmlspecialchars.js"></script>
 <script src="build/notification_top.js"></script>
