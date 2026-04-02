@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="content-language" content="en-us">
+    <!-- <meta http-equiv="Content-Security-Policy" content="object-src 'none';style-src 'self';child-src 'self';frame-src 'self';"> -->
+    <meta id="viewport" name="viewport"
+        content="width=1024, initial-scale=1.0, minimum-scale=0.5, maximum-scale=4.0, user-scalable=yes">
+    <title>TEX shinobi Web Configurator</title>
+    <meta name="description" content="TEX shinobi programmable mechanical keyboard web configurator">
+    <!-- <link rel="alternate" hreflang="tw" href="" /> -->
+    <meta name="keywords" content="TEX,shinobi,mechanical keyboard">
+    <meta name="description" itemprop="description"
+        content="TEX shinobi programmable mechanical keyboard web configurator">
+    <meta property="og:title" itemprop="name" content="TEX shinobi Web Configurator">
+    <meta property="og:url" itemprop="url" content="https://program.tex.com.tw/shinobi/">
+    <meta property="og:image" itemprop="image" content="https://program.tex.com.tw/shinobi/build/shinobi.png">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="314">
+    <meta property="og:description" content="TEX shinobi programmable mechanical keyboard web configurator">
+    <meta property="og:locale" content="zh_TW">
+    <meta property="og:locale:alternate" content="zh_TW" />
+    <meta property="og:site_name" content="TEX shinobi Web Configurator">
+    <meta property="og:type" itemprop="articleSection" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="">
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:title" content="TEX shinobi Web Configurator">
+    <meta name="twitter:description" content="TEX shinobi programmable mechanical keyboard web configurator">
+    <meta name="twitter:image" content="https://program.tex.com.tw/shinobi/build/shinobi.png">
+    <link rel="shortcut icon" type="image/png" href="https://program.tex.com.tw/shinobi/build/favicon.png?ts=20170923">
+    <link rel="apple-touch-icon" href="https://program.tex.com.tw/shinobi/build/favicon.png?ts=20170923">
+    <link rel="apple-touch-icon" sizes="76x76"
+        href="https://program.tex.com.tw/shinobi/build/favicon_76.png?ts=20170923">
+    <link rel="apple-touch-icon" sizes="120x120"
+        href="https://program.tex.com.tw/shinobi/build/favicon_120.png?ts=20170923">
+    <link rel="apple-touch-icon" sizes="152x152"
+        href="https://program.tex.com.tw/shinobi/build/favicon_152.png?ts=20170923">
+    <link rel="icon" sizes="192x192" href="https://program.tex.com.tw/shinobi/build/favicon_192.png?ts=20170923">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link href="./build/tex.css" rel="stylesheet" lazyload>
+    <link href="./build/notification_top.css" rel="stylesheet" lazyload>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" lazyload>
+    <link rel="stylesheet" href="./build/tippy.css" lazyload>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-101925003-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-101925003-2');
+    </script>
+
+    <script>
+        TEX = {
+            VIEW: {
+                // nav: ['layout', 'keymap', 'setting', 'download'],
+                nav: ['layout', 'macro', 'keymap', 'download', 'test'],
+                status: {
+                    'layout': false,
+                    'macro': false,
+                    'keymap': false,
+                    'setting': false,
+                    'download': false
+                }
+            },
+            DATA: {
+                keyboard: 'yoda',
+                layoutType: 'ansi',
+                currentProfile: 'profile1',
+                currentLayer: 'd4',
+                currentMacro: '',
+                macro: {
+                    'macro_1': [],
+                    'macro_2': [],
+                    'macro_3': [],
+                    'macro_4': [],
+                    'macro_5': [],
+                    'macro_6': [],
+                    'macro_7': [],
+                    'macro_8': [],
+                    'macro_9': [],
+                    'macro_10': [],
+                    'macro_11': [],
+                    'macro_12': []
+                },
+                layout: {
+                    'profile1': {
+                        'd4': [],
+                        'fn1': [],
+                        'fn2': [],
+                        'fn3': []
+                    },
+                    'profile2': {
+                        'd4': [],
+                        'fn1': [],
+                        'fn2': [],
+                        'fn3': []
+                    },
+                    'profile3': {
+                        'd4': [],
+                        'fn1': [],
+                        'fn2': [],
+                        'fn3': []
+                    }
+                },
+                fnCount: {
+                    'profile1': {
+                        'fn1': 2,
+                        'fn2': 0,
+                        'fn3': 0,
+                        'fntp': 0
+                    },
+                    'profile2': {
+                        'fn1': 2,
+                        'fn2': 0,
+                        'fn3': 0,
+                        'fntp': 0
+                    },
+                    'profile3': {
+                        'fn1': 2,
+                        'fn2': 0,
+                        'fn3': 0,
+                        'fntp': 0
+                    }
+                },
+                diySwitch: {
+                    'switchLeft1': 0,
+                    'switchRight1': 0,
+                    'switchRight2': 0,
+                    'switchRight3': 0,
+                    'switchRight4': 0
+                },
+                userShared: [],
+                setting: {
+                    'trackpoint': 50,
+                    'scrollReverse': false,
+                    'sensitivity': 20,
+                    'led': 10,
+                    'keyDebounce': 10,
+                    'keyRepeat': 10,
+                    'keyDelay': 10,
+                }
+            },
+            POOL: {},
+            GENERATE: { // WORKROUND set keychange d4 value 10
+                'profile1': {
+                    'keyChange': {
+                        '10': {
+                            'data': '10',
+                            'index': '10'
+                        }
+                    },
+                    'fn1': {},
+                    'fn2': {},
+                    'fn3': {},
+                    'fn1Top': {},
+                    'fn2Top': {},
+                    'fn3Top': {},
+                    'fn1Pos': {
+                        '0,0': '0,0',
+                        '8,6': '8,6'
+                    },
+                    'fn2Pos': {},
+                    'fn3Pos': {},
+                    'fnTp': {
+                        // '8,6': '8,6'
+                    }
+                },
+                'profile2': {
+                    'keyChange': {
+                        '10': {
+                            'data': '10',
+                            'index': '10'
+                        }
+                    },
+                    'fn1': {},
+                    'fn2': {},
+                    'fn3': {},
+                    'fn1Top': {},
+                    'fn2Top': {},
+                    'fn3Top': {},
+                    'fn1Pos': {
+                        '6,0': '6,0',
+                        '8,6': '8,6'
+                    },
+                    'fn2Pos': {},
+                    'fn3Pos': {},
+                    'fnTp': {
+                        // '8,6': '8,6'
+                    }
+                },
+                'profile3': {
+                    'keyChange': {
+                        '10': {
+                            'data': '10',
+                            'index': '10'
+                        }
+                    },
+                    'fn1': {},
+                    'fn2': {},
+                    'fn3': {},
+                    'fn1Top': {},
+                    'fn2Top': {},
+                    'fn3Top': {},
+                    'fn1Pos': {
+                        '6,0': '6,0',
+                        '8,6': '8,6'
+                    },
+                    'fn2Pos': {},
+                    'fn3Pos': {},
+                    'fnTp': {
+                        // '8,6': '8,6'
+                    }
+                }
+            },
+            MODELKEYCODELAYER: null,
+            shardId: null,
+            USER: {},
+            SIGNOUT: false,
+            OAUTH: false
+        };
+    </script>
+    <script>
+        (function () {
+            function apply_viewport() {
+                var ww = window.screen.width;
+                var mw = 1280; // min width of site
+                var ratio = ww / mw; //calculate ratio
+                var viewport_meta_tag = document.querySelector('#viewport');
+                if (ww < mw) { //smaller than minimum size
+                    viewport_meta_tag.setAttribute('content', 'initial-scale=' + ratio + ', maximum-scale=2, minimum-scale=0.25, user-scalable=yes, width=' + ww);
+                }
+                else { //regular size
+                    viewport_meta_tag.setAttribute('content', 'initial-scale=1.0, maximum-scale=1, minimum-scale=1.0, user-scalable=yes, width=' + ww);
+                }
+            }
+            window.addEventListener('resize', function () {
+                apply_viewport();
+            });
+            apply_viewport();
+        })()
+    </script>
+</head>
+
+<body class="loading">
+    <!-- <body class=""> -->
+    <div id="bg">
+    </div>
+
+    <div id="browser_update" class="hide">
+        <h2>We only support modern web browser like</h2>
+        <section class="pure-g">
+            <div id="chrome_wrapper" class="pure-u-1-5 vertical_middle">Chrome</div>
+            <div id="firefox_wrapper" class="pure-u-1-5 vertical_middle">Firefox</div>
+            <div id="ie_wrapper" class="pure-u-1-5 vertical_middle">IE 10+</div>
+            <div id="safari_wrapper" class="pure-u-1-5 vertical_middle">Safari</div>
+            <div id="opera_wrapper" class="pure-u-1-5 vertical_middle">Opera</div>
+        </section>
+    </div>
+    <script>
+        var scriptTag = document.createElement('script');
+        scriptTag.setAttribute('id', 'browser_js');
+        scriptTag.src = './build/browser.js';
+        document.getElementsByTagName('head')[0].appendChild(scriptTag);
+        scriptTag.onload = function () {
+            if (browser() === 'IE7' ||
+                browser() === 'IE8' ||
+                browser() === 'IE9'
+            ) {
+                document.getElementById('browser_update').setAttribute('class', '');
+            }
+        }
+    // var check = setInterval(function () {
+    //     if (document.getElementById('browser_js')) {
+    //         clearInterval(check);
+    //     }
+    // }, 300);
+    // setTimeout(function () {
+    //     clearInterval(check);
+    // }, 5000);
+    </script>
+
+    <div id="loading_view">
+        <div id="loader">
+            <span class="item-1"></span>
+            <span class="item-2"></span>
+            <span class="item-3"></span>
+            <span class="item-4"></span>
+            <span class="item-5"></span>
+            <span class="item-6"></span>
+            <span class="item-7"></span>
+            <!-- <div>初始化 App</div> -->
+        </div>
+    </div>
+    <div id="tex_header" class="pure-g clearfix pure-menu-horizontal">
+        <h1 class="pure-u-2-5 large">TEX shinobi Web Configurator</h1>
+        <ul class="pure-u-3-5">
+            <li class="pure-menu-item nav vertical_middle" id="user_info"></li>
+            <!-- <li class="pure-menu-item pure-menu-has-children pure-menu-allow-hover nav hide" id="user_setting">
+            <a href="javascript:void(0);" class="pure-menu-link vertical_middle">Setting</a>
+            <ul class="pure-menu-children">
+                <li class="pure-menu-item" id="config_save"><a href="javascript:void(0)" class="pure-menu-link vertical_middle">Save this config</a></li>
+                <li class="pure-menu-item hide" id="config_share"><a href="javascript:void(0)" class="pure-menu-link vertical_middle">Share this config</a></li>
+                <li class="pure-menu-item" id="sign_out"><a href="javascript:void(0)" class="pure-menu-link vertical_middle">Sign out</a></li>
+            </ul>
+        </li> -->
+            <li class="pure-menu-item nav hide" id="config_save"><a href="javascript:void(0)"
+                    class="pure-menu-link vertical_middle">Save Config</a></li>
+            <li class="pure-menu-item nav hide" id="sign_out"><a href="javascript:void(0)"
+                    class="pure-menu-link vertical_middle">Sign Out</a></li>
+            <li class="pure-menu-item nav hide" id="sign_in"><a href="/account.html"
+                    class="pure-menu-link vertical_middle">Sign In</a></li>
+            <!-- <li class="pure-menu-item nav"><a href="./disqus.html#disqus_thread" class="pure-menu-link vertical_middle" target="_blank">Forum</a></li> -->
+            <!-- <li class="pure-menu-item nav"><a rel="nofollow" href="https://docs.google.com/forms/d/e/1FAIpQLSdDzwYYEWUF95xP2muD0wpTaKFXdb21F2uaY2pLDTM8YfK4Qw/viewform" class="pure-menu-link vertical_middle" target="_blank">Feedback</a></li> -->
+            <li class="pure-menu-item nav"><a href="./release_note.html" class="pure-menu-link vertical_middle"
+                    target="_blank">Release Note</a></li>
+        </ul>
+    </div>
+    <div id="tex_step_nav" class="pure-menu pure-menu-horizontal">
+        <ul class="pure-menu-list pure-g">
+            <li class="pure-menu-item pure-u-1-5"><a id="layout_nav" href="#layout" class="pure-menu-link">Layout
+                    selection</a></li>
+            <li class="pure-menu-item pure-u-1-5"><a id="macro_nav" href="#macro" class="pure-menu-link">Macro
+                    setting</a></li>
+            <li class="pure-menu-item pure-u-1-5"><a id="keymap_nav" href="#keymap" class="pure-menu-link">Keyboard
+                    setting</a></li>
+            <!-- <li class="pure-menu-item pure-u-1-4"><a href="#setting" class="pure-menu-link">Keyboard setting</a></li> -->
+            <li class="pure-menu-item pure-u-1-5"><a id="download_nav" href="#download"
+                    class="pure-menu-link">Download</a></li>
+            <li class="pure-menu-item pure-u-1-5"><a id="test_nav" href="#test" class="pure-menu-link"
+                    title="You can test your keyboard">Keyboard test</a></li>
+        </ul>
+    </div>
+    <div id="tex_step" class="vertical_middle">
+        <a id="prev_step" class="pure-button hide" href="">
+            < Prev step</a>
+                <a id="next_step" class="pure-button hide" href="">Next step ></a>
+    </div>
+    <div id="layout" class="hide">
+        <h2>Select layout you want to config</h2>
+        <div class="tex_radio_select pure-g">
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_ansi" class="layout_select" type="radio" name="layout_type"
+                        data-layout-type="ansi">
+                    <span class="check"></span>
+                    <label for="radio_ansi">
+                        ANSI
+                    </label>
+                </div>
+            </div>
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_iso" class="layout_select" type="radio" name="layout_type" data-layout-type="iso">
+                    <span class="check"></span>
+                    <label for="radio_iso">
+                        ISO
+                    </label>
+                </div>
+            </div>
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_jis" class="layout_select" type="radio" name="layout_type" data-layout-type="jis">
+                    <span class="check"></span>
+                    <label for="radio_jis">
+                        JIS
+                    </label>
+                </div>
+            </div>
+        </div>
+        <section id="keyboard_layout" class="keyboaed_layout"></section>
+    </div>
+
+    <div id="macro" class="hide">
+        <h2>Setting Macro key and then can use macro key in Keyboard setting</h2>
+        <div class="tips">
+            <p>If you do not want to set macro key, you can skip this step</p>
+            <p>You can set up to 12 macro keys</p>
+        </div>
+        <div id="macro_keys_container">
+            <!-- <div id="macro_add" class="keycaps keycap_1_5 flex_center">
+            <div class="add"></div>
+        </div> -->
+            <div id="macro_keys">
+                <div id="macro_1" class="keycaps keycap_1_5 flex_center">M1</div>
+                <div id="macro_2" class="keycaps keycap_1_5 flex_center">M2</div>
+                <div id="macro_3" class="keycaps keycap_1_5 flex_center">M3</div>
+                <div id="macro_4" class="keycaps keycap_1_5 flex_center">M4</div>
+                <div id="macro_5" class="keycaps keycap_1_5 flex_center">M5</div>
+                <div id="macro_6" class="keycaps keycap_1_5 flex_center">M6</div>
+                <div id="macro_7" class="keycaps keycap_1_5 flex_center">M7</div>
+                <div id="macro_8" class="keycaps keycap_1_5 flex_center">M8</div>
+                <div id="macro_9" class="keycaps keycap_1_5 flex_center">M9</div>
+                <div id="macro_10" class="keycaps keycap_1_5 flex_center">M10</div>
+                <div id="macro_11" class="keycaps keycap_1_5 flex_center">M11</div>
+                <div id="macro_12" class="keycaps keycap_1_5 flex_center">M12</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="keymap" class="hide">
+        <h2>Choose profile and remap your key</h2>
+        <div class="tex_radio_select pure-g">
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_profile_1" class="profile_select" type="radio" name="profile"
+                        data-profile="profile1" checked>
+                    <span class="check"></span>
+                    <label for="radio_profile_1">
+                        profile 1
+                    </label>
+                </div>
+            </div>
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_profile_2" class="profile_select" type="radio" name="profile"
+                        data-profile="profile2">
+                    <span class="check"></span>
+                    <label for="radio_profile_2">
+                        profile 2
+                    </label>
+                </div>
+            </div>
+            <div class="pure-u-1-3">
+                <div class="tex_radio_select_wrapper vertical_middle">
+                    <input id="radio_profile_3" class="profile_select" type="radio" name="profile"
+                        data-profile="profile3">
+                    <span class="check"></span>
+                    <label for="radio_profile_3">
+                        profile 3
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div id="keymap_fn">
+            <div id="keymap_fn_profile1" class="keymap_profile_fn hide animated fadeIn">
+                <div id="keymap_fn_profile1_d4" class="tex_tag focus" data-profile="profile1" data-layer="d4">Top layer
+                </div>
+                <div id="keymap_fn_profile1_fn1" class="tex_tag hide" data-profile="profile1" data-layer="fn1">FN1 layer
+                </div>
+                <div id="keymap_fn_profile1_fn2" class="tex_tag hide" data-profile="profile1" data-layer="fn2">FN2 layer
+                </div>
+                <div id="keymap_fn_profile1_fn3" class="tex_tag hide" data-profile="profile1" data-layer="fn3">FN3 layer
+                </div>
+            </div>
+            <div id="keymap_fn_profile2" class="keymap_profile_fn hide animated fadeIn">
+                <div id="keymap_fn_profile2_d4" class="tex_tag focus" data-profile="profile2" data-layer="d4">Top layer
+                </div>
+                <div id="keymap_fn_profile2_fn1" class="tex_tag hide" data-profile="profile2" data-layer="fn1">FN1 layer
+                </div>
+                <div id="keymap_fn_profile2_fn2" class="tex_tag hide" data-profile="profile2" data-layer="fn2">FN2 layer
+                </div>
+                <div id="keymap_fn_profile2_fn3" class="tex_tag hide" data-profile="profile2" data-layer="fn3">FN3 layer
+                </div>
+            </div>
+            <div id="keymap_fn_profile3" class="keymap_profile_fn hide animated fadeIn">
+                <div id="keymap_fn_profile3_d4" class="tex_tag focus" data-profile="profile3" data-layer="d4">Top layer
+                </div>
+                <div id="keymap_fn_profile3_fn1" class="tex_tag hide" data-profile="profile3" data-layer="fn1">FN1 layer
+                </div>
+                <div id="keymap_fn_profile3_fn2" class="tex_tag hide" data-profile="profile3" data-layer="fn2">FN2 layer
+                </div>
+                <div id="keymap_fn_profile3_fn3" class="tex_tag hide" data-profile="profile3" data-layer="fn3">FN3 layer
+                </div>
+            </div>
+        </div>
+        <section id="keymap_wrapper" class="small">
+            <section id="keyboard_keymap" class="keyboaed_keymap">
+                <div id="keymap_profile1" class="keymap_profile hide">
+                    <div class="keymap_d4"></div>
+                </div>
+                <div id="keymap_profile2" class="keymap_profile hide">
+                    <div class="keymap_d4"></div>
+                </div>
+                <div id="keymap_profile3" class="keymap_profile hide">
+                    <div class="keymap_d4"></div>
+                </div>
+            </section>
+        </section>
+    </div>
+
+    <div id="setting" class="hide">
+        <div class="pure-g">
+            <div class="pure-u-1-3">
+                <section id="section_trackpoint">
+                    <h3>Trackpoint</h3>
+                    <div class="group">
+                        <h4>trackpoint sensitivity</h4>
+                        <input id="" type="range" min="0" max="100" value="50" data-type="trackpoint" />
+                        <br>
+                        <br>
+                        <input id="scroll_reverse" type="checkbox" data-type="scrollReverse">
+                        <label for="scroll_reverse">scroll reverse</label>
+                    </div>
+                    <div class="group">
+                        <h4>keyboard's mouse pointer sensitivity</h4>
+                        <input id="" type="range" min="0" max="100" value="50" data-type="sensitivity" />
+                    </div>
+                </section>
+            </div>
+            <div class="pure-u-1-3">
+                <section id="section_led">
+                    <h3>Led</h3>
+                    <div class="group">
+                        <h4>trun off led time when keyboard is not used for</h4>
+                        <input id="" type="range" min="0" max="100" value="50" step="20" data-type="led" />
+                    </div>
+                </section>
+            </div>
+            <div class="pure-u-1-3">
+                <section id="section_keyboard">
+                    <h3>keyboard</h3>
+                    <div class="group">
+                        <h4>Key de-bounce</h4>
+                        <input id="" type="range" min="0" max="100" value="50" data-type="keyDebounce" />
+                    </div>
+                    <div class="group">
+                        <h4>Key repeat</h4>
+                        <input id="" type="range" min="0" max="100" value="50" data-type="keyRepeat" />
+                    </div>
+                    <div class="group">
+                        <h4>Key delay unit repeat</h4>
+                        <input id="" type="range" min="0" max="100" value="50" data-type="keyDelay" />
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+    <div id="download" class="hide">
+        <h2>Now, you can download your setting as .TEX file</h2>
+        <div id="download_btn_container">
+            <a id="dol_btn" href="javascript:void(0)" class="pure-button pure-button-primary">Download .TEX</a>
+            <form action="" method="post" class="hide">
+                <input id="keyamp_data" name="keyChange" type="text">
+                <input type="submit">
+            </form>
+        </div>
+        <section id="download_container">
+            <section class="tips">
+                <p>.TEX filename must be English capital letters.</p>
+                <p>You can choose profile 1 (or 2/3) by switching DIP port 1 (or 2/3) on.</p>
+            </section>
+            <!-- <h3 class="xlarge">How to use?</h3> -->
+            <section id="step_1" class="mod_table step">
+                <h4 class="mod_table_cell large">Step1</h4>
+                <img class="mod_table_cell" src="./build/step_01.png" srcset="./build/step_01_2x.png" alt="">
+                <p class="mod_table_cell large">Switch DIP port 6 "ON" on the back of the keyboard. (as shown in
+                    figure).</p>
+            </section>
+            <section id="step_2" class="mod_table step">
+                <h4 class="mod_table_cell large">Step2</h4>
+                <img class="mod_table_cell" src="./build/step_02.png" srcset="./build/step_02_2x.png" alt="">
+                <p class="mod_table_cell large">Reconnect keyboard to the computer.</p>
+            </section>
+            <section id="step_3" class="mod_table step">
+                <h4 class="mod_table_cell large">Step3</h4>
+                <img class="mod_table_cell" src="./build/step_03.png" srcset="./build/step_03_2x.png" alt="">
+                <p class="mod_table_cell large">Download .TEX file from web.</p>
+            </section>
+            <section id="step_4" class="mod_table step">
+                <h4 class="mod_table_cell large">Step4</h4>
+                <img class="mod_table_cell" src="./build/step_04.png" srcset="./build/step_04_2x.png" alt="">
+                <p class="mod_table_cell large">Copy the .TEX file to the disc of keyboard.</p>
+            </section>
+            <section id="step_5" class="mod_table step">
+                <h4 class="mod_table_cell large">Step5</h4>
+                <img class="mod_table_cell" src="./build/step_05.png" srcset="./build/step_05_2x.png" alt="">
+                <p class="mod_table_cell large">Disconnect keyboard. Switch DIP port 6 "OFF" and port 1 (or 2/3) "ON" as
+                    you want.</p>
+            </section>
+            <section id="step_6" class="mod_table step">
+                <h4 class="mod_table_cell large">Step6</h4>
+                <img class="mod_table_cell" src="./build/step_06.png" srcset="./build/step_06_2x.png" alt="">
+                <p class="mod_table_cell large">And reconnect keyboard to computer. Enjoy the remapping!</p>
+            </section>
+        </section>
+    </div>
+    <div id="test" class="hide">
+        <div id="test_keyboard" class="animated fadeIn"></div>
+    </div>
+    <div id="model_macro" class="tex_modal hide">
+        <div class="tex_modal_container">
+            <div class="tex_modal_hd pure-g">
+                <span class="pure-u-1-2">Setting Macro Key - <span id="model_macro_key"></span></span>
+                <span class="pure-u-1-2 tex_modal_close">
+                    <span></span>
+                </span>
+            </div>
+            <div class="tex_modal_bd pure-g">
+            </div>
+            <div class="tex_modal_ft"></div>
+        </div>
+    </div>
+    <div id="model_keycode" class="tex_modal hide">
+        <div class="tex_modal_container">
+            <div class="tex_modal_hd pure-g">
+                <span class="pure-u-1-2">Select key</span>
+                <span class="pure-u-1-2 tex_modal_close">
+                    <span></span>
+                </span>
+            </div>
+            <div class="tex_modal_bd">
+                <ul id="key_tab" class="pure-g">
+                    <li class="pure-u-1-6 focus" data-id="keycode_keyboard">Main keyboard</li>
+                    <li class="pure-u-1-6" data-id="keycode_iso">ISO</li>
+                    <li class="pure-u-1-6" data-id="keycode_jis">JIS</li>
+                    <li class="pure-u-1-6" data-id="keycode_application_media">Application / Media</li>
+                    <li class="pure-u-1-6" data-id="keycode_other_mouse">Other / Macro</li>
+                    <li class="pure-u-1-6" data-id="keycode_fn">FN</li>
+                </ul>
+                <div id="keycode_keyboard" class="pure-g animated fadeIn">
+                    <div class="pure-u main_area">
+                        <div id="function_key"></div>
+                        <div id="main_key"></div>
+                    </div>
+                    <div class="pure-u navigation_area">
+                        <div id="misc_key"></div>
+                        <div id="navigation_key"></div>
+                    </div>
+                    <div class="pure-u num_area_1">
+                        <div id="number_pad_1_key"></div>
+                    </div>
+                    <div class="pure-u num_area_2">
+                        <div id="number_pad_2_key"></div>
+                    </div>
+                </div>
+                <div id="keycode_iso" class="hide animated fadeIn">
+                    <ul class="pure-g lang_tab">
+                        <li class="pure-u-1-6 focus" data-lang="uk">UK</li>
+                        <li class="pure-u-1-6" data-lang="fr">FR</li>
+                        <li class="pure-u-1-6" data-lang="de">DE</li>
+                        <li class="pure-u-1-6" data-lang="sp">SP</li>
+                        <li class="pure-u-1-6" data-lang="ru">RU</li>
+                        <li class="pure-u-1-6" data-lang="nor">NOR</li>
+                    </ul>
+                </div>
+                <div id="keycode_jis" class="hide animated fadeIn"></div>
+                <div id="keycode_application_media" class="hide animated fadeIn">
+                    <div id="keycode_media" class="">
+                        <h4>Media</h4>
+                    </div>
+                    <div id="keycode_application" class="">
+                        <h4>Application(Windows only)</h4>
+                    </div>
+                </div>
+                <div id="keycode_other_mouse" class="hide animated fadeIn">
+                    <div id="keycode_other" class="">
+                        <h4>Other</h4>
+                    </div>
+                    <div id="keycode_f_row" class="">
+                        <h4>F row</h4>
+                    </div>
+                    <div id="keycode_mouse" class="">
+                        <h4>Mouse</h4>
+                    </div>
+                    <div id="keycode_trackpoint" class="">
+                        <h4>Trackpoint</h4>
+                    </div>
+                    <div id="keycode_macro" class="">
+                        <h4>Macro</h4>
+                    </div>
+                </div>
+                <div id="keycode_fn" class="hide animated fadeIn"></div>
+            </div>
+            <div class="tex_modal_ft"></div>
+        </div>
+    </div>
+    <div id="model_keycode_layer" class="tex_modal hide">
+        <div class="tex_modal_container">
+            <div class="tex_modal_hd pure-g">
+                <span class="pure-u-1-2">Select key for fn layer</span>
+                <span class="pure-u-1-2 tex_modal_close">
+                    <span></span>
+                </span>
+            </div>
+            <div class="tex_modal_bd">
+                <ul id="key_layer_tab" class="pure-g">
+                    <li class="pure-u-1-5 focus" data-id="keycode_layer_keyboard">Main keyboard</li>
+                    <li class="pure-u-1-5" data-id="keycode_layer_iso">ISO</li>
+                    <li class="pure-u-1-5" data-id="keycode_layer_jis">JIS</li>
+                    <li class="pure-u-1-5" data-id="keycode_layer_application_media">Application / Media</li>
+                    <li class="pure-u-1-5" data-id="keycode_layer_other_mouse">Other / Macro</li>
+                </ul>
+                <div id="keycode_layer_keyboard" class="pure-g animated fadeIn">
+                    <div class="pure-u main_area">
+                        <div id="function_layer_key"></div>
+                        <div id="main_layer_key"></div>
+                    </div>
+                    <div class="pure-u navigation_area">
+                        <div id="misc_layer_key"></div>
+                        <div id="navigation_layer_key"></div>
+                    </div>
+                    <div class="pure-u num_area_1">
+                        <div id="number_pad_1_layer_key"></div>
+                    </div>
+                    <div class="pure-u num_area_2">
+                        <div id="number_pad_2_layer_key"></div>
+                    </div>
+                </div>
+                <div id="keycode_layer_iso" class="hide animated fadeIn">
+                    <ul class="pure-g lang_tab">
+                        <li class="pure-u-1-6 focus" data-lang="uk">UK</li>
+                        <li class="pure-u-1-6" data-lang="fr">FR</li>
+                        <li class="pure-u-1-6" data-lang="de">DE</li>
+                        <li class="pure-u-1-6" data-lang="sp">SP</li>
+                        <li class="pure-u-1-6" data-lang="ru">RU</li>
+                        <li class="pure-u-1-6" data-lang="nor">NOR</li>
+                    </ul>
+                </div>
+                <div id="keycode_layer_jis" class="hide animated fadeIn"></div>
+                <div id="keycode_layer_application_media" class="hide animated fadeIn">
+                    <div id="keycode_layer_media" class="">
+                        <h4>Media</h4>
+                    </div>
+                    <div id="keycode_layer_application" class="">
+                        <h4>Application(Windows only)</h4>
+                    </div>
+                </div>
+                <div id="keycode_layer_other_mouse" class="hide animated fadeIn">
+                    <div id="keycode_layer_other" class="">
+                        <h4>Other</h4>
+                    </div>
+                    <div id="keycode_layer_mouse" class="">
+                        <h4>Mouse</h4>
+                    </div>
+                    <div id="keycode_layer_trackpoint" class="">
+                        <h4>Trackpoint</h4>
+                    </div>
+                    <div id="keycode_layer_macro" class="">
+                        <h4>Macro</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="tex_modal_ft"></div>
+        </div>
+    </div>
+    <div id="model_keycode_macro" class="tex_modal hide">
+        <div class="tex_modal_container">
+            <div class="tex_modal_hd pure-g">
+                <span class="pure-u-1-2">Select key for macro</span>
+                <span class="pure-u-1-2 tex_modal_close">
+                    <span></span>
+                </span>
+            </div>
+            <div class="tex_modal_bd">
+                <ul id="key_macro_tab" class="pure-g">
+                    <li class="pure-u-1-5 focus" data-id="keycode_macro_keyboard">Main keyboard</li>
+                    <li class="pure-u-1-5" data-id="keycode_macro_iso">ISO</li>
+                    <li class="pure-u-1-5" data-id="keycode_macro_jis">JIS</li>
+                    <li class="pure-u-1-5" data-id="keycode_macro_application_media">Application / Media</li>
+                    <li class="pure-u-1-5" data-id="keycode_macro_other_mouse">Other</li>
+                </ul>
+                <div id="keycode_macro_keyboard" class="pure-g animated fadeIn">
+                    <div class="pure-u main_area">
+                        <div id="function_macro_key"></div>
+                        <div id="main_macro_key"></div>
+                    </div>
+                    <div class="pure-u navigation_area">
+                        <div id="misc_macro_key"></div>
+                        <div id="navigation_macro_key"></div>
+                    </div>
+                    <div class="pure-u num_area_1">
+                        <div id="number_pad_1_macro_key"></div>
+                    </div>
+                    <div class="pure-u num_area_2">
+                        <div id="number_pad_2_macro_key"></div>
+                    </div>
+                </div>
+                <div id="keycode_macro_iso" class="hide animated fadeIn">
+                    <ul class="pure-g lang_tab">
+                        <li class="pure-u-1-6 focus" data-lang="uk">UK</li>
+                        <li class="pure-u-1-6" data-lang="fr">FR</li>
+                        <li class="pure-u-1-6" data-lang="de">DE</li>
+                        <li class="pure-u-1-6" data-lang="sp">SP</li>
+                        <li class="pure-u-1-6" data-lang="ru">RU</li>
+                        <li class="pure-u-1-6" data-lang="nor">NOR</li>
+                    </ul>
+                </div>
+                <div id="keycode_macro_jis" class="hide animated fadeIn"></div>
+                <div id="keycode_macro_application_media" class="hide animated fadeIn">
+                    <div id="keycode_macro_media" class="">
+                        <h4>Media</h4>
+                    </div>
+                    <div id="keycode_macro_application" class="">
+                        <h4>Application(Windows only)</h4>
+                    </div>
+                </div>
+                <div id="keycode_macro_other_mouse" class="hide animated fadeIn">
+                    <div id="keycode_macro_other" class="">
+                        <h4>Other</h4>
+                    </div>
+                    <div id="keycode_layer_f_row" class="">
+                        <h4>F row</h4>
+                    </div>
+                    <div id="keycode_macro_mouse" class="">
+                        <h4>Mouse</h4>
+                    </div>
+                    <div id="keycode_macro_trackpoint" class="">
+                        <h4>Trackpoint</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="tex_modal_ft"></div>
+        </div>
+    </div>
+</body>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
+<!-- Add Firebase products that you want to use -->
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-database.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/5.5.0/firebase.js"></script> -->
+<!-- <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script> -->
+<!-- <script src="https://www.gstatic.com/firebasejs/ui/live/0.4/firebase-ui-auth.js"></script> -->
+<!-- <script src="https://www.gstatic.com/firebasejs/3.3.2/firebase.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.js"></script>
+<script src="./build/htmlspecialchars.js?t=20170901"></script>
+<script src="./build/notification_top.js?t=20170901"></script>
+<script src="./build/tippy.all.min.js"></script>
+<script>
+    tippy('#test_nav');
+</script>
+<script src="./build/tex.js?t=2020511"></script>
+
+</html>
