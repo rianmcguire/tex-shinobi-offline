@@ -108,7 +108,7 @@
             if (keycode === 0xFF && type === 0xFF) break;
 
             var ts = tsLo | (tsHi << 8);
-            var kcStr = ('0' + keycode.toString(10)).slice(-2);
+            var kcStr = String(keycode);
 
             if (type === MACRO_PRESS) {
                 // If we were collecting release records, flush previous entry
@@ -426,4 +426,313 @@
     }
 
     if (typeof module !== 'undefined') module.exports = { generateTEX: generateTEX, parseTEX: parseTEX };
+
+    // ==================== UI Integration ====================
+
+    if (typeof document === 'undefined') return;
+
+    // Patch locationHashChanged to use relative routing instead of absolute /shinobi/
+    var origLocationHashChanged = locationHashChanged;
+    locationHashChanged = function(E) {
+        var hash = location.hash.split('#')[1];
+        var route = hash ? hash.split(',')[0] : '';
+        var validRoutes = ['layout', 'macro', 'keymap', 'setting', 'download', 'test'];
+        if (validRoutes.indexOf(route) === -1) {
+            // Default case: use relative hash instead of absolute /shinobi/#layout
+            location.hash = '#layout';
+            return;
+        }
+        origLocationHashChanged(E);
+    };
+    window.onhashchange = locationHashChanged;
+
+    // Override the download button to use client-side generation
+    var origViewDownload = TEX.VIEW.download;
+    var downloadPatched = false;
+
+    TEX.VIEW.download = function(E) {
+        if (origViewDownload) origViewDownload(E);
+        if (downloadPatched) return;
+        downloadPatched = true;
+
+        setTimeout(function() {
+            var dolBtn = document.querySelector('#dol_btn');
+            if (!dolBtn) return;
+
+            // Replace click handler
+            var newBtn = dolBtn.cloneNode(true);
+            dolBtn.parentNode.replaceChild(newBtn, dolBtn);
+
+            newBtn.addEventListener('click', function(ev) {
+                ev.preventDefault();
+                try {
+                    var data = TEX.filterGenerateData();
+                    var binary = generateTEX(data);
+                    var blob = new Blob([binary], { type: 'application/octet-stream' });
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'KEYMAP.TEX';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                } catch (err) {
+                    alert('Error generating .TEX file: ' + err.message);
+                    console.error(err);
+                }
+            });
+        }, 500);
+    };
+
+    // Set up Import .TEX handler on the header nav element
+    (function setupImport() {
+        var importLi = document.querySelector('#import_tex');
+        if (!importLi) return;
+
+        var importLink = importLi.querySelector('a');
+        var fileInput = importLi.querySelector('input[type="file"]');
+
+        importLink.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (!fileInput.files.length) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var imported = parseTEX(e.target.result);
+
+                    // Build reverse keycode lookup (hex → display name) from
+                    // TEX.KEYCAPSCATEGORY and the keyboard layout template
+                    var hexToName = {};
+                    // First, pull from the layout template (has modifiers, FN keys, etc.)
+                    var tmpl = TEX.LAYOUT[TEX.DATA.keyboard] && TEX.LAYOUT[TEX.DATA.keyboard][TEX.DATA.layoutType];
+                    if (tmpl) {
+                        for (var tp in tmpl) {
+                            var tRows = tmpl[tp];
+                            for (var tri = 0; tri < tRows.length; tri++) {
+                                var tr = tRows[tri];
+                                if (!tr.hex || !tr.val) continue;
+                                for (var tci = 0; tci < tr.hex.length; tci++) {
+                                    if (tr.hex[tci] != null && tr.val[tci] && hexToName[tr.hex[tci]] === undefined) {
+                                        hexToName[tr.hex[tci]] = tr.val[tci];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Then, overlay with KEYCAPSCATEGORY (key picker display names)
+                    for (var cat in TEX.KEYCAPSCATEGORY) {
+                        var rows = TEX.KEYCAPSCATEGORY[cat];
+                        if (!Array.isArray(rows)) continue;
+                        for (var ri = 0; ri < rows.length; ri++) {
+                            var row = rows[ri];
+                            if (!row.hex || !row.val) continue;
+                            for (var ci = 0; ci < row.hex.length; ci++) {
+                                if (row.hex[ci] != null && hexToName[row.hex[ci]] === undefined) {
+                                    hexToName[row.hex[ci]] = row.val[ci];
+                                }
+                            }
+                        }
+                    }
+                    function keycodeName(code) {
+                        return hexToName[code] !== undefined ? hexToName[code] : null;
+                    }
+
+                    // Detect layout type from fn1Top indices — fn1Top has
+                    // entries for ALL keys in the layout (index = hex + 256).
+                    // ISO-only keys: CODE42 (50), CODE45 (100)
+                    // JIS-only keys: CODE14 (137), CODE56 (135), CODE131 (139),
+                    //                CODE132 (138), CODE133 (136)
+                    var detectedLayout = 'ansi';
+                    var fn1Top = imported.profile1 && imported.profile1.fn1Top;
+                    if (fn1Top) {
+                        if (fn1Top[256 + 137] || fn1Top[256 + 135] || fn1Top[256 + 139]) {
+                            detectedLayout = 'jis';
+                        } else if (fn1Top[256 + 50] || fn1Top[256 + 100]) {
+                            detectedLayout = 'iso';
+                        }
+                    }
+                    if (detectedLayout !== TEX.DATA.layoutType) {
+                        TEX.DATA.layoutType = detectedLayout;
+                        var radio = document.querySelector('#radio_' + detectedLayout);
+                        if (radio) radio.checked = true;
+                    }
+
+                    // Rebuild everything from scratch by resetting the view
+                    // status flags and re-running the full init sequence.
+                    // This mimics what happens when the user changes layout type.
+                    TEX.POOL = {};
+                    TEX.DATA.currentLayer = 'd4';
+                    TEX.VIEW.status.layout = false;
+                    TEX.VIEW.status.keymap = false;
+
+                    // dataLayoutInit: resets GENERATE + DATA.layout to defaults,
+                    // rebuilds DOM, populates all layers from LAYOUT template
+                    TEX.dataLayoutInit();
+
+                    // Now overwrite GENERATE with imported data (for .TEX export)
+                    // and patch DATA.layout so the UI reflects the remapped keys.
+                    var profiles = ['profile1', 'profile2', 'profile3'];
+                    for (var pi = 0; pi < profiles.length; pi++) {
+                        var pname = profiles[pi];
+                        if (!imported[pname] || !TEX.GENERATE[pname]) continue;
+                        var parsed = imported[pname];
+
+                        // Overwrite GENERATE
+                        var genKeys = ['keyChange','fn1','fn2','fn3','fn1Top','fn2Top','fn3Top','fn1Pos','fn2Pos','fn3Pos','fnTp'];
+                        for (var gi = 0; gi < genKeys.length; gi++) {
+                            if (parsed[genKeys[gi]]) TEX.GENERATE[pname][genKeys[gi]] = parsed[genKeys[gi]];
+                        }
+
+                        // Patch DATA.layout d4: apply keyChange remaps
+                        var d4Rows = TEX.DATA.layout[pname] && TEX.DATA.layout[pname].d4;
+                        if (d4Rows) {
+                            for (var idx in parsed.keyChange) {
+                                var kc = parsed.keyChange[idx];
+                                var hexIdx = kc.index;
+                                var hexData = kc.data;
+                                if (hexIdx === hexData) continue; // not actually changed
+                                for (var r = 0; r < d4Rows.length; r++) {
+                                    for (var c = 0; c < d4Rows[r].hex.length; c++) {
+                                        if (d4Rows[r].hex[c] === hexIdx) {
+                                            d4Rows[r].hexCustom[c] = hexData;
+                                            var name = keycodeName(hexData);
+                                            if (name !== null) d4Rows[r].valCustom[c] = name;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Patch DATA.layout fn layers
+                        var fnDefs = [
+                            { gen: 'fn1', data: 'fn1', offset: 256 },
+                            { gen: 'fn2', data: 'fn2', offset: 512 },
+                            { gen: 'fn3', data: 'fn3', offset: 768 }
+                        ];
+                        for (var fi = 0; fi < fnDefs.length; fi++) {
+                            var def = fnDefs[fi];
+                            var fnRows = TEX.DATA.layout[pname] && TEX.DATA.layout[pname][def.data];
+                            if (!fnRows || !parsed[def.gen]) continue;
+                            for (var fnIdx in parsed[def.gen]) {
+                                var fnEntry = parsed[def.gen][fnIdx];
+                                var fHexIdx = fnEntry.index;
+                                var fHexData = fnEntry.data;
+                                var origHex = fHexIdx - def.offset;
+                                for (var r = 0; r < fnRows.length; r++) {
+                                    for (var c = 0; c < fnRows[r].hex.length; c++) {
+                                        if (fnRows[r].hex[c] === origHex) {
+                                            fnRows[r].hexFn[c] = fHexData;
+                                            var fnName = keycodeName(fHexData);
+                                            if (fnName !== null) fnRows[r].fn[c] = fnName;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Apply fnPos to DATA.layout d4: set valCustom to "FN1"/"FN2"/"FN3"
+                    // at the imported positions so the UI shows the FN key labels
+                    var fnPosMap = [
+                        { gen: 'fn1Pos', label: 'FN1' },
+                        { gen: 'fn2Pos', label: 'FN2' },
+                        { gen: 'fn3Pos', label: 'FN3' }
+                    ];
+                    var profiles2 = ['profile1', 'profile2', 'profile3'];
+                    for (var pi2 = 0; pi2 < profiles2.length; pi2++) {
+                        var pn = profiles2[pi2];
+                        if (!imported[pn]) continue;
+                        var d4 = TEX.DATA.layout[pn] && TEX.DATA.layout[pn].d4;
+                        if (!d4) continue;
+                        for (var fpi = 0; fpi < fnPosMap.length; fpi++) {
+                            var fnp = fnPosMap[fpi];
+                            var importedPos = imported[pn][fnp.gen] || {};
+                            for (var r = 0; r < d4.length; r++) {
+                                for (var c = 0; c < d4[r].colRow.length; c++) {
+                                    var cr = d4[r].colRow[c];
+                                    // Key is at an imported FN position but wasn't FN by default → label it
+                                    if (importedPos[cr] && d4[r].val[c] !== fnp.label) {
+                                        d4[r].valCustom[c] = fnp.label;
+                                    }
+                                    // Key was FN by default but isn't in imported fnPos → show its remapped value
+                                    if (d4[r].val[c] === fnp.label && !importedPos[cr]) {
+                                        // Use the already-applied keyChange valCustom if set,
+                                        // otherwise look up from hexCustom
+                                        if (!d4[r].valCustom[c]) {
+                                            var kcName = keycodeName(d4[r].hexCustom[c]);
+                                            d4[r].valCustom[c] = kcName !== null ? kcName : d4[r].val[c];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Apply macro data – convert from export format
+                    // ({keyCode:[...], ts}) to editor format ({stickyKey:[...], ts}).
+                    // keyCode is [press0, press1, ..., releaseN, ..., release0]
+                    // where presses = stickyKey keycodes, releases = reversed.
+                    // So first half of keyCode = the press keycodes.
+                    if (imported.profile1 && imported.profile1.macro) {
+                        var convertedMacro = {};
+                        var impMacro = imported.profile1.macro;
+                        for (var mkey in impMacro) {
+                            var mEntries = impMacro[mkey];
+                            var converted = [];
+                            for (var me = 0; me < mEntries.length; me++) {
+                                var mEntry = mEntries[me];
+                                var kc = mEntry.keyCode;
+                                // Terminator entry
+                                if (kc.length === 1 && (kc[0] === 0 || kc[0] === '0')) {
+                                    continue; // skip terminator, UI adds it on export
+                                }
+                                var halfLen = Math.floor(kc.length / 2);
+                                var sticky = [];
+                                for (var sk = 0; sk < halfLen; sk++) {
+                                    var code = String(kc[sk]);
+                                    var name = keycodeName(parseInt(code, 10));
+                                    sticky.push({ keyCode: code, key: name !== null ? name : code });
+                                }
+                                converted.push({ stickyKey: sticky, ts: mEntry.ts || 128 });
+                            }
+                            if (!converted.length) {
+                                converted.push({ stickyKey: [], ts: 128 });
+                            }
+                            convertedMacro[mkey] = converted;
+                        }
+                        // Ensure all 12 macro slots exist
+                        for (var ms = 1; ms <= 12; ms++) {
+                            var msKey = 'macro_' + ms;
+                            if (!convertedMacro[msKey]) {
+                                convertedMacro[msKey] = [{ stickyKey: [], ts: 128 }];
+                            }
+                        }
+                        TEX.DATA.macro = convertedMacro;
+                    }
+
+                    // Refresh macro button enable/disable state
+                    if (TEX.updateMarco) TEX.updateMarco();
+
+                    // Final re-render with patched data.
+                    // dataLayoutUpdate re-renders d4 keyboards, then
+                    // dataLayoutFnInit rebuilds FN layer tabs and keyboards.
+                    TEX.dataLayoutUpdate();
+
+                    // Re-trigger keymap view init so profile switching
+                    // and keycap click handlers get re-attached
+                    if (TEX.VIEW.keymap) TEX.VIEW.keymap();
+
+                    console.log('TEX config imported successfully');
+                } catch (err) {
+                    alert('Error importing .TEX file: ' + err.message);
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(fileInput.files[0]);
+            fileInput.value = '';
+        });
+    })();
 })();

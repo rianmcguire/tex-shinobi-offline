@@ -284,6 +284,10 @@
                 <li class="pure-menu-item" id="sign_out"><a href="javascript:void(0)" class="pure-menu-link vertical_middle">Sign out</a></li>
             </ul>
         </li> -->
+            <li class="pure-menu-item nav" id="import_tex">
+                <a href="javascript:void(0)" class="pure-menu-link vertical_middle">Import .TEX</a>
+                <input type="file" accept=".TEX,.tex" style="display:none">
+            </li>
             <!-- Hidden stubs: tex.js references these elements -->
             <li class="hide" id="config_save"><a href="javascript:void(0)"></a></li>
             <li class="hide" id="sign_out"><a href="javascript:void(0)"></a></li>
@@ -807,5 +811,6 @@
     tippy('#test_nav');
 </script>
 <script src="build/tex.js"></script>
+<script src="tex-offline.js"></script>
 
 </html>
