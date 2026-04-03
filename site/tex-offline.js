@@ -193,6 +193,18 @@
                             // fn: 0x18 record replaces the 0x20 inline
                             records.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayerNums[secName], isTop: false });
                         }
+                    } else if (secName === 'keyChange' && dataStr.charAt(0) === 'm') {
+                        // keyChange macro: fnTop 0x18 record in place,
+                        // unless already queued from the fnTop section
+                        var macroIdx = parseInt(dataStr.substring(1)) - 1;
+                        var keyHex = parseInt(entry.index);
+                        var alreadyQueued = fnTopMacroRecords.some(function(r) { return r.keyHex === keyHex; });
+                        if (alreadyQueued) {
+                            // fnTopMacroRecords will replace this position
+                            records.push({ type: 0x20, idx: keyHex, data: keyHex });
+                        } else {
+                            records.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: 1, isTop: true });
+                        }
                     } else {
                         var idx = parseInt(entry.index);
                         var data = parseInt(entry.data);
@@ -274,7 +286,7 @@
                     view.setUint16(offset + 2, rec.macroIdx, true);
                     u8[offset + 4] = rec.keyHex;
                     u8[offset + 5] = rec.isTop ? 0x3c : (0x3d + rec.fnLayer - 1);
-                    u8[offset + 6] = p + 1;
+                    u8[offset + 6] = 1;
                     u8[offset + 7] = 0x00;
                 } else {
                     u8[offset] = 0x02;

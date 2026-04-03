@@ -107,6 +107,7 @@ describe('Backend Comparison', () => {
     'macro-keys',
     'macro-keys-multiple-fn-layers',
     'mouse-move',
+    'multi-profile-macros',
     'fn2-fn3-layers',
     'fn2pos',
     'fntp-positions',
