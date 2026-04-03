@@ -9,6 +9,10 @@
     var MAGIC = new Uint8Array([0x43, 0x59, 0x46, 0x49]); // "CYFI"
     var MACRO_SECTION_SIZE = 0x0280; // 640 bytes per macro section
 
+    // Profile record subtypes
+    var MAP = 0x20;
+    var MACRO = 0x18;
+
     // Macro record types
     var MACRO_PRESS = 0x3c;
     var MACRO_RELEASE = 0x5c;
@@ -141,8 +145,8 @@
 
         // Count non-empty macro sections for header sizing
         var numMacroSections = 0;
-        for (var p = 0; p < numProfiles; p++) {
-            var md = generateData[profiles[p]].macro || {};
+        for (var pname of profiles) {
+            var md = generateData[pname].macro || {};
             for (var i = 1; i <= 12; i++) {
                 if (md['macro_' + i] && md['macro_' + i].length) numMacroSections++;
             }
@@ -153,106 +157,79 @@
 
         // First pass: generate all profile data to know sizes
         var profileBuffers = [];
-        for (var p = 0; p < numProfiles; p++) {
-            var pdata = generateData[profiles[p]];
+        for (var pname of profiles) {
+            var pdata = generateData[pname];
             var records = [];
 
-            // Collect all records: key remaps (sub=0x20) and macro keys (sub=0x18).
-            // fn macro keys: 0x18 record replaces the 0x20 record in the fn section.
-            // fnTop macro keys: 0x20 with data=0 in fnTop section, 0x18 in keyChange section.
-            var fnLayerOffsets = { fn1: 256, fn2: 512, fn3: 768, fn1Top: 256, fn2Top: 512, fn3Top: 768 };
-            var fnLayerNums = { fn1: 1, fn2: 2, fn3: 3, fn1Top: 1, fn2Top: 2, fn3Top: 3 };
-            var fnTopMacroRecords = []; // 0x18 records to interleave into keyChange
+            // Translate the UI data model (fn<N>, fn<N>Top, keyChange) into
+            // binary MAP (key → keycode) and MACRO (key → macro slot) records.
+            //
+            // The binary has only fn layers and a top layer. There's
+            // no passthrough — fn<N>Top is the UI's copy of the top-layer
+            // bindings that must be written explicitly into each fn layer.
+            //
+            // Passthrough macros (macros on fn<N>Top) are still fn-layer
+            // records — they just get emitted later, in the top-layer part
+            // of the stream.  The fn section gets a MAP placeholder (data=0),
+            // and the MACRO replaces the normal top-layer MAP for that key.
+            // The placeholder is only written when the fn layer has custom
+            // (non-passthrough) MAP entries.
+            var fnTopByKey = {}; // keyHex -> [MACRO records] to emit in the top-layer section
+            var fnHasRemaps = {}; // fnLayer -> true if fn layer has any MAP entries
 
-            // Backend order: all fn layers first, then all fnTop layers, then keyChange
-            var sections = ['fn1', 'fn2', 'fn3', 'fn1Top', 'fn2Top', 'fn3Top', 'keyChange'];
-            for (var s = 0; s < sections.length; s++) {
-                var secName = sections[s];
+            // Backend order: fn1-3, fn1Top-3Top, then keyChange.
+            var fnSections = ['fn1', 'fn2', 'fn3', 'fn1Top', 'fn2Top', 'fn3Top'];
+            for (var secName of fnSections) {
                 var sec = pdata[secName];
-                if (!sec) continue;
-                var keys = Object.keys(sec).map(Number).sort(function(a, b) { return a - b; });
-                for (var k = 0; k < keys.length; k++) {
-                    var entry = sec[keys[k]];
+                var fnLayer = parseInt(secName.charAt(2));
+                var isTop = secName.includes('Top');
+                for (var entry of Object.values(sec)) {
                     var dataStr = String(entry.data);
-                    if (dataStr.charAt(0) === 'm' && fnLayerNums[secName]) {
+                    if (dataStr.charAt(0) === 'm') {
                         var macroIdx = parseInt(dataStr.substring(1)) - 1;
-                        var keyHex = parseInt(entry.index) - fnLayerOffsets[secName];
-                        var isTop = secName.indexOf('Top') >= 0;
+                        var fnOffset = fnLayer * 256;
+                        var keyHex = parseInt(entry.index) - fnOffset;
                         if (isTop) {
-                            // fnTop: write 0x20 with data=0 here, queue 0x18 for keyChange.
-                            // Only write 0x18 when the fn layer has remap entries.
-                            records.push({ type: 0x20, idx: parseInt(entry.index), data: 0 });
-                            var fnSec = pdata['fn' + fnLayerNums[secName]] || {};
-                            var hasRemaps = Object.keys(fnSec).some(function(k) {
-                                return String(fnSec[k].data).charAt(0) !== 'm';
-                            });
-                            if (hasRemaps) {
-                                fnTopMacroRecords.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayerNums[secName], isTop: true });
+                            records.push({ type: MAP, idx: parseInt(entry.index), data: 0 });
+                            if (fnHasRemaps[fnLayer]) {
+                                if (!fnTopByKey[keyHex]) fnTopByKey[keyHex] = [];
+                                fnTopByKey[keyHex].push({ type: MACRO, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayer, isTop: true });
                             }
                         } else {
-                            // fn: 0x18 record replaces the 0x20 inline
-                            records.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayerNums[secName], isTop: false });
-                        }
-                    } else if (secName === 'keyChange' && dataStr.charAt(0) === 'm') {
-                        // keyChange macro: fnTop 0x18 record in place,
-                        // unless already queued from the fnTop section
-                        var macroIdx = parseInt(dataStr.substring(1)) - 1;
-                        var keyHex = parseInt(entry.index);
-                        var alreadyQueued = fnTopMacroRecords.some(function(r) { return r.keyHex === keyHex; });
-                        if (alreadyQueued) {
-                            // fnTopMacroRecords will replace this position
-                            records.push({ type: 0x20, idx: keyHex, data: keyHex });
-                        } else {
-                            records.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: 1, isTop: true });
+                            records.push({ type: MACRO, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayer, isTop: false });
                         }
                     } else {
-                        var idx = parseInt(entry.index);
-                        var data = parseInt(entry.data);
-                        records.push({ type: 0x20, idx: idx, data: data });
+                        if (!isTop) fnHasRemaps[fnLayer] = true;
+                        records.push({ type: MAP, idx: parseInt(entry.index), data: parseInt(entry.data) });
                     }
                 }
             }
 
-            // fnTop 0x18 records go into the keyChange section, replacing
-            // the 0x20 at the same keyHex and inserting extras after it.
-            if (fnTopMacroRecords.length > 0) {
-                var fnTopByKey = {};
-                for (var fi = 0; fi < fnTopMacroRecords.length; fi++) {
-                    var fk = fnTopMacroRecords[fi].keyHex;
-                    if (!fnTopByKey[fk]) fnTopByKey[fk] = [];
-                    fnTopByKey[fk].push(fnTopMacroRecords[fi]);
+            // keyChange (top layer)
+            for (var entry of Object.values(pdata.keyChange)) {
+                var idx = parseInt(entry.index);
+                var dataStr = String(entry.data);
+                if (fnTopByKey[idx]) {
+                    records.push(...fnTopByKey[idx]);
+                    delete fnTopByKey[idx];
+                } else if (dataStr.charAt(0) === 'm') {
+                    records.push({ type: MACRO, macroIdx: parseInt(dataStr.substring(1)) - 1, keyHex: idx, fnLayer: 1, isTop: true });
+                } else {
+                    records.push({ type: MAP, idx: idx, data: parseInt(entry.data) });
                 }
-                var merged = [];
-                for (var ri = 0; ri < records.length; ri++) {
-                    var rec = records[ri];
-                    if (rec.type === 0x20 && rec.idx < 256 && fnTopByKey[rec.idx]) {
-                        // Replace 0x20 with the 0x18 records for this key
-                        var group = fnTopByKey[rec.idx];
-                        for (var gi = 0; gi < group.length; gi++) merged.push(group[gi]);
-                        delete fnTopByKey[rec.idx];
-                    } else {
-                        merged.push(rec);
-                    }
-                }
-                records = merged;
             }
 
-            // Build per-type fn position records.
-            // Each non-empty type gets its own record.
+            // FN key positions
             var fnPosTypes = [];
-            for (var f = 0; f < fnPosTypeSpecs.length; f++) {
-                var spec = fnPosTypeSpecs[f];
+            for (var spec of fnPosTypeSpecs) {
                 var posObj = pdata[spec.key];
-                if (posObj) {
-                    var posKeys = Object.keys(posObj);
-                    if (posKeys.length > 0) {
-                        var positions = [];
-                        for (var pk = 0; pk < posKeys.length; pk++) {
-                            positions.push(encodeFnPos(posObj[posKeys[pk]]));
-                        }
-                        fnPosTypes.push({ sub: spec.sub, positions: positions });
-                    }
-                }
+                if (!posObj) continue;
+                var posKeys = Object.keys(posObj);
+                if (!posKeys.length) continue;
+                fnPosTypes.push({
+                    sub: spec.sub,
+                    positions: posKeys.map(function(pk) { return encodeFnPos(posObj[pk]); })
+                });
             }
 
             profileBuffers.push({ records: records, fnPosTypes: fnPosTypes });
@@ -273,24 +250,22 @@
 
         // Write key profile data
         var keyDataStart = offset;
-        for (var p = 0; p < numProfiles; p++) {
+        for (var pb of profileBuffers) {
             profileOffsets.push(offset);
-            var pb = profileBuffers[p];
 
             // Write key remap (sub=0x20) and macro (sub=0x18) records
-            for (var r = 0; r < pb.records.length; r++) {
-                var rec = pb.records[r];
-                if (rec.type === 0x18) {
+            for (var rec of pb.records) {
+                if (rec.type === MACRO) {
                     u8[offset] = 0x02;
-                    u8[offset + 1] = 0x18;
+                    u8[offset + 1] = MACRO;
                     view.setUint16(offset + 2, rec.macroIdx, true);
                     u8[offset + 4] = rec.keyHex;
-                    u8[offset + 5] = rec.isTop ? 0x3c : (0x3d + rec.fnLayer - 1);
-                    u8[offset + 6] = 1;
+                    u8[offset + 5] = rec.isTop ? 0x3c : (0x3c + rec.fnLayer);
+                    u8[offset + 6] = rec.isTop ? rec.fnLayer : 1;
                     u8[offset + 7] = 0x00;
                 } else {
                     u8[offset] = 0x02;
-                    u8[offset + 1] = 0x20;
+                    u8[offset + 1] = MAP;
                     view.setUint16(offset + 2, rec.idx, true);
                     view.setUint16(offset + 4, rec.data, true);
                     view.setUint16(offset + 6, 0, true);
@@ -300,8 +275,7 @@
 
             // One fnpos (fn key position) record per non-empty position type
             // (fn1Pos=0x94, fn2Pos=0x95, fn3Pos=0x96, fnTp=0x97)
-            for (var ft = 0; ft < pb.fnPosTypes.length; ft++) {
-                var fpt = pb.fnPosTypes[ft];
+            for (var fpt of pb.fnPosTypes) {
                 u8[offset] = 0x02;
                 u8[offset + 1] = fpt.sub;
                 view.setUint16(offset + 2, fpt.positions.length, true);
@@ -327,9 +301,9 @@
                 var macroId = ((i - 1) << 16) | ((p + 1) << 8) | 0x01;
                 macroOffsets.push({ id: macroId, offset: offset });
                 var records = encodeMacroRecords(macroData[mkey]);
-                for (var r = 0; r < records.length; r++) {
-                    u8.set(records[r], offset);
-                    offset += records[r].length;
+                for (var rec of records) {
+                    u8.set(rec, offset);
+                    offset += rec.length;
                 }
                 offset = macroOffsets[macroOffsets.length - 1].offset + MACRO_SECTION_SIZE;
             }
@@ -344,9 +318,9 @@
             entryOffset += 8;
         }
 
-        for (var m = 0; m < macroOffsets.length; m++) {
-            view.setUint32(entryOffset, macroOffsets[m].id, true);
-            view.setUint32(entryOffset + 4, macroOffsets[m].offset, true);
+        for (var mo of macroOffsets) {
+            view.setUint32(entryOffset, mo.id, true);
+            view.setUint32(entryOffset + 4, mo.offset, true);
             entryOffset += 8;
         }
 
@@ -443,7 +417,7 @@
                 var idx = view.getUint16(off + 2, true);
                 var data = view.getUint16(off + 4, true);
 
-                if (cmd === 0x02 && sub === 0x18) {
+                if (cmd === 0x02 && sub === MACRO) {
                     // Macro-on-fn record: assigns a macro to a key on an fn layer
                     var macroIdx = idx; // 0-based macro index
                     var keyHex = u8[off + 4];
@@ -461,7 +435,7 @@
                         var fnIndex = keyHex + fnLayer * 256;
                         profile['fn' + fnLayer][fnIndex] = { index: fnIndex, data: macroName };
                     }
-                } else if (cmd === 0x02 && sub === 0x20) {
+                } else if (cmd === 0x02 && sub === MAP) {
                     var entry = { index: idx, data: data };
                     if (idx < 256) {
                         profile.keyChange[idx] = entry;
