@@ -248,7 +248,7 @@
                     if (posKeys.length > 0) {
                         var positions = [];
                         for (var pk = 0; pk < posKeys.length; pk++) {
-                            positions.push(encodeFnPos(posKeys[pk]));
+                            positions.push(encodeFnPos(posObj[posKeys[pk]]));
                         }
                         fnPosTypes.push({ sub: spec.sub, positions: positions });
                     }

@@ -48,7 +48,7 @@ async function readOrGenerateFixture(texFile, payload) {
  * Normalize a UI payload for roundtrip comparison.
  * - UI stores index/data as strings (DOM attributes); parser returns numbers
  * - Empty macro slots don't roundtrip (backend only writes non-empty)
- * - Macro assignments on fnTop layers are ignore when the fn layer is unused
+ * - fnPos entries with value 0xFF (cleared slots) don't survive the binary format
  */
 function normalizePayload(payload) {
   for (const pname of ['profile1', 'profile2', 'profile3']) {
@@ -56,6 +56,15 @@ function normalizePayload(payload) {
     if (payload[pname].macro) {
       for (const key of Object.keys(payload[pname].macro)) {
         if (!payload[pname].macro[key].length) delete payload[pname].macro[key];
+      }
+    }
+    // fnPos entries that encode to 0xFF are "cleared" slots — not stored in binary
+    for (const posSec of ['fn1Pos', 'fn2Pos', 'fn3Pos']) {
+      const obj = payload[pname][posSec];
+      if (!obj) continue;
+      for (const key of Object.keys(obj)) {
+        const parts = String(obj[key]).split(',');
+        if (parseInt(parts[0]) * 8 + parseInt(parts[1]) === 0xFF) delete obj[key];
       }
     }
     const keySections = ['keyChange','fn1','fn2','fn3','fn1Top','fn2Top','fn3Top'];
@@ -92,10 +101,6 @@ describe('Backend Comparison', () => {
     'fn-positions',
     'fn1-layer',
     'fn1-macro-keys',
-    'macro-keys',
-    'macro-keys-multiple-fn-layers',
-    'mouse-move',
-    'multi-profile-macros',
     'fn2-fn3-layers',
     'fn2pos',
     'fntp-positions',
@@ -105,12 +110,17 @@ describe('Backend Comparison', () => {
     'macro-all-sources',
     'macro-chord',
     'macro-chord-symmetric',
+    'macro-keys',
+    'macro-keys-multiple-fn-layers',
     'macro-sequence',
     'macros-on-p2p3',
     'media-keys-fn1',
     'minimal-header',
     'modifier-swap',
+    'mouse-move',
     'multi-macro',
+    'multi-profile-macros',
+    'multi-profile-fn-keys',
     'single-fn1pos',
     'trackpoint-speed',
     'zero-fn-positions',
