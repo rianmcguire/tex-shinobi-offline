@@ -157,19 +157,72 @@
             var pdata = generateData[profiles[p]];
             var records = [];
 
-            // Collect all key remap records
+            // Collect all records: key remaps (sub=0x20) and macro keys (sub=0x18).
+            // fn macro keys: 0x18 record replaces the 0x20 record in the fn section.
+            // fnTop macro keys: 0x20 with data=0 in fnTop section, 0x18 in keyChange section.
+            var fnLayerOffsets = { fn1: 256, fn2: 512, fn3: 768, fn1Top: 256, fn2Top: 512, fn3Top: 768 };
+            var fnLayerNums = { fn1: 1, fn2: 2, fn3: 3, fn1Top: 1, fn2Top: 2, fn3Top: 3 };
+            var fnTopMacroRecords = []; // 0x18 records to interleave into keyChange
+
             // Backend order: all fn layers first, then all fnTop layers, then keyChange
             var sections = ['fn1', 'fn2', 'fn3', 'fn1Top', 'fn2Top', 'fn3Top', 'keyChange'];
             for (var s = 0; s < sections.length; s++) {
-                var sec = pdata[sections[s]];
+                var secName = sections[s];
+                var sec = pdata[secName];
                 if (!sec) continue;
                 var keys = Object.keys(sec).map(Number).sort(function(a, b) { return a - b; });
                 for (var k = 0; k < keys.length; k++) {
                     var entry = sec[keys[k]];
-                    var idx = parseInt(entry.index);
-                    var data = parseInt(entry.data);
-                    records.push({ idx: idx, data: data });
+                    var dataStr = String(entry.data);
+                    if (dataStr.charAt(0) === 'm' && fnLayerNums[secName]) {
+                        var macroIdx = parseInt(dataStr.substring(1)) - 1;
+                        var keyHex = parseInt(entry.index) - fnLayerOffsets[secName];
+                        var isTop = secName.indexOf('Top') >= 0;
+                        if (isTop) {
+                            // fnTop: write 0x20 with data=0 here, queue 0x18 for keyChange.
+                            // Only write 0x18 when the fn layer has remap entries.
+                            records.push({ type: 0x20, idx: parseInt(entry.index), data: 0 });
+                            var fnSec = pdata['fn' + fnLayerNums[secName]] || {};
+                            var hasRemaps = Object.keys(fnSec).some(function(k) {
+                                return String(fnSec[k].data).charAt(0) !== 'm';
+                            });
+                            if (hasRemaps) {
+                                fnTopMacroRecords.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayerNums[secName], isTop: true });
+                            }
+                        } else {
+                            // fn: 0x18 record replaces the 0x20 inline
+                            records.push({ type: 0x18, macroIdx: macroIdx, keyHex: keyHex, fnLayer: fnLayerNums[secName], isTop: false });
+                        }
+                    } else {
+                        var idx = parseInt(entry.index);
+                        var data = parseInt(entry.data);
+                        records.push({ type: 0x20, idx: idx, data: data });
+                    }
                 }
+            }
+
+            // fnTop 0x18 records go into the keyChange section, replacing
+            // the 0x20 at the same keyHex and inserting extras after it.
+            if (fnTopMacroRecords.length > 0) {
+                var fnTopByKey = {};
+                for (var fi = 0; fi < fnTopMacroRecords.length; fi++) {
+                    var fk = fnTopMacroRecords[fi].keyHex;
+                    if (!fnTopByKey[fk]) fnTopByKey[fk] = [];
+                    fnTopByKey[fk].push(fnTopMacroRecords[fi]);
+                }
+                var merged = [];
+                for (var ri = 0; ri < records.length; ri++) {
+                    var rec = records[ri];
+                    if (rec.type === 0x20 && rec.idx < 256 && fnTopByKey[rec.idx]) {
+                        // Replace 0x20 with the 0x18 records for this key
+                        var group = fnTopByKey[rec.idx];
+                        for (var gi = 0; gi < group.length; gi++) merged.push(group[gi]);
+                        delete fnTopByKey[rec.idx];
+                    } else {
+                        merged.push(rec);
+                    }
+                }
+                records = merged;
             }
 
             // Build per-type fn position records.
@@ -212,12 +265,24 @@
             profileOffsets.push(offset);
             var pb = profileBuffers[p];
 
+            // Write key remap (sub=0x20) and macro (sub=0x18) records
             for (var r = 0; r < pb.records.length; r++) {
-                u8[offset] = 0x02;
-                u8[offset + 1] = 0x20;
-                view.setUint16(offset + 2, pb.records[r].idx, true);
-                view.setUint16(offset + 4, pb.records[r].data, true);
-                view.setUint16(offset + 6, 0, true);
+                var rec = pb.records[r];
+                if (rec.type === 0x18) {
+                    u8[offset] = 0x02;
+                    u8[offset + 1] = 0x18;
+                    view.setUint16(offset + 2, rec.macroIdx, true);
+                    u8[offset + 4] = rec.keyHex;
+                    u8[offset + 5] = rec.isTop ? 0x3c : (0x3d + rec.fnLayer - 1);
+                    u8[offset + 6] = p + 1;
+                    u8[offset + 7] = 0x00;
+                } else {
+                    u8[offset] = 0x02;
+                    u8[offset + 1] = 0x20;
+                    view.setUint16(offset + 2, rec.idx, true);
+                    view.setUint16(offset + 4, rec.data, true);
+                    view.setUint16(offset + 6, 0, true);
+                }
                 offset += 8;
             }
 
@@ -370,7 +435,23 @@
                 var idx = view.getUint16(off + 2, true);
                 var data = view.getUint16(off + 4, true);
 
-                if (cmd === 0x02 && sub === 0x20) {
+                if (cmd === 0x02 && sub === 0x18) {
+                    // Macro-on-fn record: assigns a macro to a key on an fn layer
+                    var macroIdx = idx; // 0-based macro index
+                    var keyHex = u8[off + 4];
+                    var byte5 = u8[off + 5];
+                    var isTop = byte5 === 0x3c; // 0x3c=fnTop, 0x3d=fn1, 0x3e=fn2, 0x3f=fn3
+                    var fnLayer = isTop ? u8[off + 6] : (byte5 - 0x3d + 1);
+                    var fnSection = 'fn' + fnLayer + (isTop ? 'Top' : '');
+                    var fnIndex = keyHex + fnLayer * 256;
+                    var macroName = 'm' + (macroIdx + 1);
+                    profile[fnSection][fnIndex] = { index: String(fnIndex), data: macroName };
+                    // fnTop 0x18 records replace the keyChange 0x20 at this position;
+                    // the UI stores the macro reference in keyChange as well
+                    if (isTop) {
+                        profile.keyChange[keyHex] = { index: String(keyHex), data: macroName };
+                    }
+                } else if (cmd === 0x02 && sub === 0x20) {
                     var entry = { index: idx, data: data };
                     if (idx < 256) {
                         profile.keyChange[idx] = entry;

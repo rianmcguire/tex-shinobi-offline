@@ -59,6 +59,9 @@ describe('Backend Comparison', () => {
     'fn-key-remap',
     'fn-positions',
     'fn1-layer',
+    'fn1-macro-keys',
+    'macro-keys',
+    'macro-keys-multiple-fn-layers',
     'fn2-fn3-layers',
     'fn2pos',
     'fntp-positions',
@@ -103,10 +106,24 @@ describe('Backend Comparison', () => {
       const parsed = parseTEX(generateTEX(payload));
 
       // Strip empty macro slots (backend only creates sections for non-empty macros)
+      // Strip fnTop macro assignments when fn layer has no remap entries (no 0x18 record written)
       for (const pname of ['profile1', 'profile2', 'profile3']) {
-        if (payload[pname] && payload[pname].macro) {
+        if (!payload[pname]) continue;
+        if (payload[pname].macro) {
           for (const key of Object.keys(payload[pname].macro)) {
             if (!payload[pname].macro[key].length) delete payload[pname].macro[key];
+          }
+        }
+        for (const [fnTop, fn] of [['fn1Top','fn1'],['fn2Top','fn2'],['fn3Top','fn3']]) {
+          if (!payload[pname][fnTop]) continue;
+          const hasRemaps = Object.values(payload[pname][fn] || {}).some(e =>
+            String(e.data).charAt(0) !== 'm');
+          if (hasRemaps) continue;
+          for (const key of Object.keys(payload[pname][fnTop])) {
+            const entry = payload[pname][fnTop][key];
+            if (typeof entry.data === 'string' && entry.data.charAt(0) === 'm') {
+              payload[pname][fnTop][key] = { index: parseInt(entry.index), data: 0 };
+            }
           }
         }
       }
