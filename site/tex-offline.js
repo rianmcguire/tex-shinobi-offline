@@ -491,15 +491,13 @@
                 var macroName = macroLookup[baseKey + ':' + fnLayer];
                 var kcEntry = profile.keyChange[baseKey];
                 var topValue = kcEntry ? kcEntry.data : baseKey;
-                // data=0 placeholder means this key's real value comes from a
-                // macro 0x18 record or the fn layer is inactive — either way it's fnTop
+                // data=0 placeholder: resolve macro name from 0x18 record or keyChange
                 if (rec.data === 0 && macroName) {
                     rec.data = macroName;
                 } else if (rec.data === 0 && typeof topValue === 'string' && topValue.charAt(0) === 'm') {
-                    rec.data = 0;
+                    rec.data = topValue;
                 }
-                var isTopLayer = rec.data === topValue ||
-                    (rec.data === 0 && typeof topValue === 'string' && topValue.charAt(0) === 'm');
+                var isTopLayer = rec.data === topValue;
                 var target = fnRangeNames[range][isTopLayer ? 1 : 0];
                 if (!profile[target][rec.index]) {
                     profile[target][rec.index] = rec;

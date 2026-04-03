@@ -58,18 +58,6 @@ function normalizePayload(payload) {
         if (!payload[pname].macro[key].length) delete payload[pname].macro[key];
       }
     }
-    for (const [fnTop, fn] of [['fn1Top','fn1'],['fn2Top','fn2'],['fn3Top','fn3']]) {
-      if (!payload[pname][fnTop]) continue;
-      const hasRemaps = Object.values(payload[pname][fn] || {}).some(e =>
-        String(e.data).charAt(0) !== 'm');
-      if (hasRemaps) continue;
-      for (const key of Object.keys(payload[pname][fnTop])) {
-        const entry = payload[pname][fnTop][key];
-        if (typeof entry.data === 'string' && entry.data.charAt(0) === 'm') {
-          payload[pname][fnTop][key] = { index: parseInt(entry.index), data: 0 };
-        }
-      }
-    }
     const keySections = ['keyChange','fn1','fn2','fn3','fn1Top','fn2Top','fn3Top'];
     for (const sec of keySections) {
       const obj = payload[pname][sec];
