@@ -413,16 +413,12 @@
                 fnTp: {}
             };
 
-            // Parse key remap records, splitting fn vs fnTop using transitions.
-            // Generator order: fn1, fn2, fn3, fn1Top, fn2Top, fn3Top, keyChange.
-            // Ranges: 0=256-511, 1=512-767, 2=768-1023. Within each section
-            // indices ascend. The fn→fnTop boundary is where either:
-            //   - the range decreases (e.g. range 2 → range 0), or
-            //   - the index decreases within the same range
-            var fnNames = [['fn1', 'fn1Top'], ['fn2', 'fn2Top'], ['fn3', 'fn3Top']];
-            var lastRange = -1;
-            var lastIdx = -1;
-            var inTop = false;
+            // Parse key remap records. Collect fn-range 0x20 records first,
+            // then classify as fn vs fnTop by comparing against keyChange:
+            // if the data matches the top layer value, it's fnTop (passthrough).
+            var fnRangeNames = [['fn1', 'fn1Top'], ['fn2', 'fn2Top'], ['fn3', 'fn3Top']];
+            var pendingFnRecords = [];
+            var macroLookup = {}; // 'keyHex:fnLayer' -> macroName from isTop 0x18 records
 
             var off = dataOffset;
             while (off + 8 <= boundary) {
@@ -442,29 +438,23 @@
                     var byte5 = u8[off + 5];
                     var isTop = byte5 === 0x3c; // 0x3c=fnTop, 0x3d=fn1, 0x3e=fn2, 0x3f=fn3
                     var fnLayer = isTop ? u8[off + 6] : (byte5 - 0x3d + 1);
-                    var fnSection = 'fn' + fnLayer + (isTop ? 'Top' : '');
-                    var fnIndex = keyHex + fnLayer * 256;
                     var macroName = 'm' + (macroIdx + 1);
-                    profile[fnSection][fnIndex] = { index: fnIndex, data: macroName };
-                    // fnTop 0x18 records replace the keyChange 0x20 at this position;
-                    // the UI stores the macro reference in keyChange as well
                     if (isTop) {
+                        // Store for deferred classification — only create fnTop
+                        // entry if a matching 0x20 placeholder exists
+                        macroLookup[keyHex + ':' + fnLayer] = macroName;
                         profile.keyChange[keyHex] = { index: keyHex, data: macroName };
+                    } else {
+                        // Non-top fn macro: write directly
+                        var fnIndex = keyHex + fnLayer * 256;
+                        profile['fn' + fnLayer][fnIndex] = { index: fnIndex, data: macroName };
                     }
                 } else if (cmd === 0x02 && sub === 0x20) {
                     var entry = { index: idx, data: data };
                     if (idx < 256) {
                         profile.keyChange[idx] = entry;
                     } else {
-                        var range = idx < 512 ? 0 : idx < 768 ? 1 : 2;
-                        if (!inTop && lastRange >= 0 &&
-                            (range < lastRange || (range === lastRange && idx < lastIdx))) {
-                            inTop = true;
-                        }
-                        lastRange = range;
-                        lastIdx = idx;
-                        var target = fnNames[range][inTop ? 1 : 0];
-                        profile[target][idx] = entry;
+                        pendingFnRecords.push(entry);
                     }
                 } else if (cmd === 0x02 && POS_TARGET_MAP[sub]) {
                     var posTarget = POS_TARGET_MAP[sub];
@@ -478,6 +468,30 @@
                     }
                 }
                 off += 8;
+            }
+
+            // Classify fn-range records: compare against keyChange to split fn vs fnTop
+            for (var fi = 0; fi < pendingFnRecords.length; fi++) {
+                var rec = pendingFnRecords[fi];
+                var range = rec.index < 512 ? 0 : rec.index < 768 ? 1 : 2;
+                var baseKey = rec.index - (range + 1) * 256;
+                var fnLayer = range + 1;
+                var macroName = macroLookup[baseKey + ':' + fnLayer];
+                var kcEntry = profile.keyChange[baseKey];
+                var topValue = kcEntry ? kcEntry.data : baseKey;
+                // data=0 placeholder means this key's real value comes from a
+                // macro 0x18 record or the fn layer is inactive — either way it's fnTop
+                if (rec.data === 0 && macroName) {
+                    rec.data = macroName;
+                } else if (rec.data === 0 && typeof topValue === 'string' && topValue.charAt(0) === 'm') {
+                    rec.data = 0;
+                }
+                var isTopLayer = rec.data === topValue ||
+                    (rec.data === 0 && typeof topValue === 'string' && topValue.charAt(0) === 'm');
+                var target = fnRangeNames[range][isTopLayer ? 1 : 0];
+                if (!profile[target][rec.index]) {
+                    profile[target][rec.index] = rec;
+                }
             }
 
             profiles[profileName] = profile;
