@@ -44,6 +44,50 @@ async function readOrGenerateFixture(texFile, payload) {
 }
 
 
+/**
+ * Normalize a UI payload for roundtrip comparison.
+ * - UI stores index/data as strings (DOM attributes); parser returns numbers
+ * - Empty macro slots don't roundtrip (backend only writes non-empty)
+ * - Macro assignments on fnTop layers are ignore when the fn layer is unused
+ */
+function normalizePayload(payload) {
+  for (const pname of ['profile1', 'profile2', 'profile3']) {
+    if (!payload[pname]) continue;
+    if (payload[pname].macro) {
+      for (const key of Object.keys(payload[pname].macro)) {
+        if (!payload[pname].macro[key].length) delete payload[pname].macro[key];
+      }
+    }
+    for (const [fnTop, fn] of [['fn1Top','fn1'],['fn2Top','fn2'],['fn3Top','fn3']]) {
+      if (!payload[pname][fnTop]) continue;
+      const hasRemaps = Object.values(payload[pname][fn] || {}).some(e =>
+        String(e.data).charAt(0) !== 'm');
+      if (hasRemaps) continue;
+      for (const key of Object.keys(payload[pname][fnTop])) {
+        const entry = payload[pname][fnTop][key];
+        if (typeof entry.data === 'string' && entry.data.charAt(0) === 'm') {
+          payload[pname][fnTop][key] = { index: parseInt(entry.index), data: 0 };
+        }
+      }
+    }
+    const keySections = ['keyChange','fn1','fn2','fn3','fn1Top','fn2Top','fn3Top'];
+    for (const sec of keySections) {
+      const obj = payload[pname][sec];
+      if (!obj) continue;
+      for (const key of Object.keys(obj)) {
+        const entry = obj[key];
+        if (typeof entry.index === 'string' && entry.data !== undefined) {
+          entry.index = parseInt(entry.index);
+          if (typeof entry.data === 'string' && entry.data.charAt(0) !== 'm') {
+            entry.data = parseInt(entry.data);
+          }
+        }
+      }
+    }
+  }
+  return payload;
+}
+
 // ==================== Tests ====================
 
 describe('Backend Comparison', () => {
@@ -62,6 +106,7 @@ describe('Backend Comparison', () => {
     'fn1-macro-keys',
     'macro-keys',
     'macro-keys-multiple-fn-layers',
+    'mouse-move',
     'fn2-fn3-layers',
     'fn2pos',
     'fntp-positions',
@@ -105,29 +150,7 @@ describe('Backend Comparison', () => {
       const payload = readFixturePayload(`${name}.json`);
       const parsed = parseTEX(generateTEX(payload));
 
-      // Strip empty macro slots (backend only creates sections for non-empty macros)
-      // Strip fnTop macro assignments when fn layer has no remap entries (no 0x18 record written)
-      for (const pname of ['profile1', 'profile2', 'profile3']) {
-        if (!payload[pname]) continue;
-        if (payload[pname].macro) {
-          for (const key of Object.keys(payload[pname].macro)) {
-            if (!payload[pname].macro[key].length) delete payload[pname].macro[key];
-          }
-        }
-        for (const [fnTop, fn] of [['fn1Top','fn1'],['fn2Top','fn2'],['fn3Top','fn3']]) {
-          if (!payload[pname][fnTop]) continue;
-          const hasRemaps = Object.values(payload[pname][fn] || {}).some(e =>
-            String(e.data).charAt(0) !== 'm');
-          if (hasRemaps) continue;
-          for (const key of Object.keys(payload[pname][fnTop])) {
-            const entry = payload[pname][fnTop][key];
-            if (typeof entry.data === 'string' && entry.data.charAt(0) === 'm') {
-              payload[pname][fnTop][key] = { index: parseInt(entry.index), data: 0 };
-            }
-          }
-        }
-      }
-      assert.deepEqual(parsed, payload);
+      assert.deepEqual(parsed, normalizePayload(payload));
     });
   }
 });

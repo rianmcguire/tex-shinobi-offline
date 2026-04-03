@@ -445,11 +445,11 @@
                     var fnSection = 'fn' + fnLayer + (isTop ? 'Top' : '');
                     var fnIndex = keyHex + fnLayer * 256;
                     var macroName = 'm' + (macroIdx + 1);
-                    profile[fnSection][fnIndex] = { index: String(fnIndex), data: macroName };
+                    profile[fnSection][fnIndex] = { index: fnIndex, data: macroName };
                     // fnTop 0x18 records replace the keyChange 0x20 at this position;
                     // the UI stores the macro reference in keyChange as well
                     if (isTop) {
-                        profile.keyChange[keyHex] = { index: String(keyHex), data: macroName };
+                        profile.keyChange[keyHex] = { index: keyHex, data: macroName };
                     }
                 } else if (cmd === 0x02 && sub === 0x20) {
                     var entry = { index: idx, data: data };
